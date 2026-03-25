@@ -9,13 +9,11 @@ const services = require('./config/services.config');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares globales (orden importa)
 app.use(loggerMiddleware);
 app.use(rateLimiter);
 app.use(express.json());
 app.use(authMiddleware);
 
-// Health check — muestra estado de cada servicio
 app.get('/health', async (req, res) => {
   const checks = await Promise.allSettled(
     Object.entries(services).map(async ([name, service]) => {
@@ -31,18 +29,15 @@ app.get('/health', async (req, res) => {
     if (check.status === 'fulfilled') {
       result[check.value.name] = check.value.status;
     } else {
-      const name = check.reason?.name || 'desconocido';
-      result[name] = 'unreachable';
+      result[check.reason?.cause?.name || 'servicio'] = 'unreachable';
     }
   });
 
   res.json(result);
 });
 
-// Rutas proxy hacia los microservicios
 setupRoutes(app);
 
-// Ruta no encontrada
 app.use((req, res) => {
   res.status(404).json({ error: `Ruta ${req.method} ${req.path} no encontrada` });
 });
