@@ -1,0 +1,49 @@
+services:
+  api-gateway:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      RECURSOS_SERVICE_URL: http://recursos-service:3002
+      NOTIF_SERVICE_URL: http://notif-service:3003
+    depends_on:
+      - auth-service
+      - recursos-service
+      - notif-service
+    networks:
+      - microservicios-net
+    restart: unless-stopped
+
+  auth-service:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "node -e \"const http=require('http');http.createServer((req,res)=>{res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({service:'auth',status:'ok'}));}).listen(3001,()=>console.log('auth-service en 3001'));\""
+    ports:
+      - "3001:3001"
+    networks:
+      - microservicios-net
+
+  recursos-service:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "node -e \"const http=require('http');http.createServer((req,res)=>{res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({service:'recursos',status:'ok'}));}).listen(3002,()=>console.log('recursos-service en 3002'));\""
+    ports:
+      - "3002:3002"
+    networks:
+      - microservicios-net
+
+  notif-service:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "node -e \"const http=require('http');http.createServer((req,res)=>{res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({service:'notificaciones',status:'ok'}));}).listen(3003,()=>console.log('notif-service en 3003'));\""
+    ports:
+      - "3003:3003"
+    networks:
+      - microservicios-net
+
+networks:
+  microservicios-net:
+    driver: bridge
