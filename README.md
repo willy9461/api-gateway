@@ -24,7 +24,7 @@ Cliente → API Gateway :3000
 
 ## Levantar el sistema
 ```bash
-git clone https://github.com/willy9461/auth-service.git
+git clone https://github.com/willy9461/api-gateway.git
 cd api-gateway
 cp .env.example .env
 docker compose up --build
